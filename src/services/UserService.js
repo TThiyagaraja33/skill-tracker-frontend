@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const HOST_URL = "http://localhost:4000";
+const HOST_URL = "http://43.204.100.237:4000";
 
 const USER_QUERY_API_BASE_URL = HOST_URL + "/api/v1/user";
 

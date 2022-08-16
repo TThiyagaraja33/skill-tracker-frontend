@@ -1,6 +1,8 @@
 import React, { useEffect, useState, Component } from 'react';
 import SkillTrackerService from '../services/SkillTrackerService';
 import { useNavigate, useLocation } from "react-router-dom";
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 const ProfileSkillListComponent = props => {
     let location = useLocation();
@@ -18,39 +20,63 @@ const ProfileSkillListComponent = props => {
             SkillTrackerService.getEmployeeById(value, jsToken)
                 .then(res => {
                     setEmployees(res.data);
+                })
+                .catch(function (error) {
+                    setErrorMessage("Profile not found for the provided criteria");
+                    setTimeout(() => {
+                        navigate('/search-employee-skill', {
+                            state: {
+                                jsToken: jsToken,
+                                roles: roles,
+                                userName: userName
+                            }
+                        });
+                    }, 1000);
                 });
         } else if (criteria === 'Name') {
             SkillTrackerService.getEmployeeByName(value, jsToken)
                 .then(res => {
                     setEmployees(res.data);
+                })
+                .catch(function (error) {
+                    setErrorMessage("Profile not found for the provided criteria");
+                    setTimeout(() => {
+                        navigate('/search-employee-skill', {
+                            state: {
+                                jsToken: jsToken,
+                                roles: roles,
+                                userName: userName
+                            }
+                        });
+                    }, 1000);
                 });
         } else if (criteria === 'Skill') {
             SkillTrackerService.getEmployeeBySkill(value, jsToken)
                 .then(res => {
                     setEmployees(res.data);
+                })
+                .catch(function (error) {
+                    setErrorMessage("Profile not found for the provided criteria");
+                    setTimeout(() => {
+                        navigate('/search-employee-skill', {
+                            state: {
+                                jsToken: jsToken,
+                                roles: roles,
+                                userName: userName
+                            }
+                        });
+                    }, 1000);
                 });
-        } else {
-            SkillTrackerService.getEmployees(jsToken)
-                .then((res) => {
-                    setEmployees(res.data);
-                    console.log("Employee list received" + JSON.stringify(employees));
-                });
-        }
-
-        if (roles.includes("WRITE_PRIVILEGE")) {
-            setDisable(false);
-        } else {
-            setDisable(true);
         }
     }, [location]);
 
-    const [disable, setDisable] = useState('');
     const [criteria, setCriteria] = useState(location.state.criteria);
     const [value, setValue] = useState(location.state.value);
     const [jsToken, setJsToken] = useState(location.state.jsToken);
     const [userName, setUserName] = useState(location.state.userName);
     const [roles, setRoles] = useState(location.state.roles);
     const [employees, setEmployees] = useState([]);
+    const [errorMessage, setErrorMessage] = useState('');
 
     let navigate = useNavigate();
 
@@ -68,43 +94,51 @@ const ProfileSkillListComponent = props => {
         <div>
             <h2 className="text-center">Employees List</h2>
             <div className="row">
-                <button id="searchEmployeeBtn" className="btn btn-success" onClick={searchEmployee} style={{ width: "160px", marginLeft: "10px" }}> Search Employee</button>
+                <button id="searchEmployeeBtn" className="btn btn-success" onClick={searchEmployee} style={{ width: "160px", marginLeft: "10px" }}> Go Back</button>
             </div>
-            <br></br> 
+            <br></br>
+            <div>
+                <Row>
+                    {errorMessage && <div className="error"> {errorMessage} </div>}
+                </Row>
+            </div> 
             <div>
                 {
                     employees.map( employee =>
-                        <div>
-                            <div className="row">
-                                <table className="table table-striped table-bordered">
-                                    <tr>
-                                        <th> Employee Id </th>
-                                        <td> {employee.id}</td>
-                                    </tr>
-                                    <tr>
-                                        <th> Employee Name </th>
-                                        <td> {employee.name}</td>
-                                    </tr>
-                                    <tr>
-                                        <th> Employee Email ID </th>
-                                        <td> {employee.emailId}</td>
-                                    </tr>
-                                    <tr>
-                                        <th> Employee Mobile </th>
-                                        <td> {employee.mobileNo}</td>
-                                    </tr>      
-                                </table>
-                            </div>,                                
-                            <div className="row">
-                                <table className="table table-striped table-bordered">
-                                    {employee.technicalSkills.map(skill => <TechnicalSkill skill = {skill}/> )}
-                                </table>
-                            </div> ,
-                            <div className="row">
-                                <table className="table table-striped table-bordered">
-                                    {employee.nonTechnicalSkills.map(skill => <TechnicalSkill skill = {skill}/> )}
-                                </table>
-                            </div>
+                        <div className="row row_space">
+                            <Row>
+                                <Col>
+                                    <table>
+                                        <tr>
+                                            <th className="table_header"> Employee Id </th>
+                                            <td className="table_profile"> {employee.id}</td>
+                                        </tr>
+                                        <tr>
+                                            <th className="table_header"> Employee Name </th>
+                                            <td className="table_profile"> {employee.name}</td>
+                                        </tr>
+                                        <tr>
+                                            <th className="table_header"> Employee Email ID </th>
+                                            <td className="table_profile"> {employee.emailId}</td>
+                                        </tr>
+                                        <tr>
+                                            <th className="table_header"> Employee Mobile </th>
+                                            <td className="table_profile"> {employee.mobileNo}</td>
+                                        </tr>      
+                                    </table>
+                                </Col>
+                                <Col>
+                                    <table>
+                                        {employee.technicalSkills.map(skill => <TechnicalSkill skill = {skill}/> )}
+                                    </table>
+                                </Col>
+                                <Col>
+                                    <table>
+                                        {employee.nonTechnicalSkills.map(skill => <TechnicalSkill skill = {skill}/> )}
+                                    </table>                                
+                                </Col>
+                            </Row>
+                            
                         </div>                       
                     )
                 }                
@@ -118,8 +152,8 @@ class TechnicalSkill extends Component {
         var skill = this.props.skill;
         return (
             <tr>
-                <th> {skill.skillName} </th>
-                <td> {skill.expertiseLevel}</td>
+                <th className="table_header"> {skill.skillName} </th>
+                <td className="table_data"> {skill.expertiseLevel}</td>
             </tr>
         )
     }        

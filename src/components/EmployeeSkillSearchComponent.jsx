@@ -13,7 +13,6 @@ const EmployeeSkillSearchComponent = props => {
         console.log("Token: " + jsToken);
     }, [location]);
 
-    const [id, setId] = useState('');
     const [criteria, setCriteria] = useState('');
     const [searchById, setSearchById] = useState('');
     const [searchByName, setSearchByName] = useState('');
@@ -21,6 +20,7 @@ const EmployeeSkillSearchComponent = props => {
     const [jsToken, setJsToken] = useState(location.state.jsToken);
     const [userName, setUserName] = useState(location.state.userName);
     const [roles, setRoles] = useState(location.state.roles);
+    const [errorMessage, setErrorMessage] = useState('');
 
     let navigate = useNavigate();
 
@@ -41,9 +41,7 @@ const EmployeeSkillSearchComponent = props => {
 
     const searchEmployee = (e) => {
         e.preventDefault();
-        // let criteria = { searchById: searchById, searchByName: searchByName, searchBySkill: searchBySkill };
-        //console.log('criteria => ' + JSON.stringify(criteria));
-
+        
         if (criteria === 'Id') {
             navigate('/list-employee-skill', {
                 state: {
@@ -76,18 +74,16 @@ const EmployeeSkillSearchComponent = props => {
                 }
             });
         } else {
+            setErrorMessage("Please refrain your search criteria");
             return
         }
     }
 
     const cancel = (e) => {
-        navigate('/list-employee-skill', {
-            state: {
-                jsToken: jsToken,
-                roles: roles,
-                userName: userName
-            }
-        });
+        e.preventDefault();
+        setSearchById("");
+        setSearchByName("");
+        setSearchBySkill("");
     }
 
     return (
@@ -121,6 +117,9 @@ const EmployeeSkillSearchComponent = props => {
                                                 value={searchBySkill} onChange={changeSearchBySkillHandler} />
                                         </div>
                                     </Col>
+                                </Row>
+                                <Row>
+                                    {errorMessage && <div className="error"> {errorMessage} </div>}
                                 </Row>
                                 <br />
                                 <button className="btn btn-success" onClick={searchEmployee}>Search</button>

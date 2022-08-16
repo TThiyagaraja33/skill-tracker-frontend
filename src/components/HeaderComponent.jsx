@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 
 const HeaderComponent = (props) => {
@@ -7,21 +7,26 @@ const HeaderComponent = (props) => {
 
     const location = useLocation();
 
+    let navigate = useNavigate();
+
     useEffect(() => {
         console.log("pathname: " + location.pathname);
         if (location.state != undefined) {
             setUserName(location.state.userName);
             setRoles(location.state.roles);
+            setDisabled(false);
+        } else {
+            setDisabled(true);
         }
-
     }, [location]);
 
     const [userName, setUserName] = useState('');
     const [roles, setRoles] = useState([]);
+    const [disabled, setDisabled] = useState('');
 
     let userSpan;
     if (userName != '') {
-        userSpan = <span style={{ color: "gold", float: 'right', marginRight: "5%" }}>Welcome : {userName}</span>;
+        userSpan = <span style={{ color: "gold", float: 'right', marginRight: "11%" }}>Welcome  {userName}</span>;
     }
 
     let roleSpan;
@@ -39,14 +44,24 @@ const HeaderComponent = (props) => {
                 }
             }
         }
-        roleSpan = <span style={{ color: "gold", float: 'right', marginRight: "5%" }}>{userRole}</span>;
+        roleSpan = <span style={{ color: "gold", float: 'right', marginRight: "1%" }}>
+            {userRole}
+            </span>;
+    }
+
+    const cancel = (e) => {
+        e.preventDefault();
+        setRoles('');
+        setUserName('');
+        navigate('/');
     }
 
     return (
-        <div style={{ backgroundColor: "#100e0e", height: "50px" }}>
+        <div style={{ backgroundColor: "#100e0e", height: "70px" }}>
             <span style={{ color: "white", fontWeight: "bold", fontSize: "20px", position: "relative", top: "13%", marginLeft: "1%" }}>Employee Skill Tracker</span>
             {userSpan}
             <br />
+            <button className="btn btn-danger signout" onClick={cancel} hidden={disabled}>Sign Out</button>
             {roleSpan}
         </div>
     )

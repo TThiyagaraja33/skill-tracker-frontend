@@ -4,70 +4,81 @@ import UserService from '../services/UserService';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 
-const HOST_URL = "http://localhost:4000";
+const HOST_URL = "http://43.204.100.237:4000";
 
 const LoginComponent = () => {
     const [userName, setUserNamed] = useState('');
     const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
     const navigate = useNavigate();
 
     const Login = (e) => {
         e.preventDefault();
-
-        var details = {
-            'username': userName,
-            'password': password,
-            'grant_type': 'password'
-        };
-
-        var formBody = [];
-        for (var property in details) {
-            var encodedKey = encodeURIComponent(property);
-            var encodedValue = encodeURIComponent(details[property]);
-            formBody.push(encodedKey + "=" + encodedValue);
-        }
-        formBody = formBody.join("&");
-
-        const headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Basic c2tpbGx0cmFja2VyQ2xpZW50OnNraWxsdHJhY2tlclNlY3JldA=='
-        }
-
-        axios.post(HOST_URL + '/oauth/token', formBody, {
-            headers: headers
-        })
-            .then(function (response) {
-                console.log("Response Received: " + JSON.stringify(response.data));
-                const tokenTemp = response.data.access_token;
-                console.log("Token Inside: " + tokenTemp);
-
-                if (tokenTemp != null) {
-                    const user = {
-                        userName: userName, password: password
-                    };
-                    UserService.findUserByName(user, tokenTemp)
-                        .then(res => {
-                            let roles = res.data.users.roles;
-
-                            if (roles.includes("ADMIN_PRIVILEGE")) {
-                                navigate('/search-employee-skill', {
-                                    state: {
-                                        jsToken: tokenTemp,
-                                        roles: roles,
-                                        userName: userName
-                                    }
-                                });
-                            }
-                            return
-                        });
-                } else {
-                    // handle error
-                }
+        if(userName == '' || password == '') {
+            setErrorMessage("Credentials should not be Empty");
+        } else {
+            var details = {
+                'username': userName,
+                'password': password,
+                'grant_type': 'password'
+            };
+    
+            var formBody = [];
+            for (var property in details) {
+                var encodedKey = encodeURIComponent(property);
+                var encodedValue = encodeURIComponent(details[property]);
+                formBody.push(encodedKey + "=" + encodedValue);
+            }
+            formBody = formBody.join("&");
+    
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Basic c2tpbGx0cmFja2VyQ2xpZW50OnNraWxsdHJhY2tlclNlY3JldA=='
+            }
+    
+            axios.post(HOST_URL + '/oauth/token', formBody, {
+                headers: headers
             })
-            .catch(function (error) {
-                console.log(error);
-            });
+                .then(function (response) {
+                    console.log("Response Received: " + JSON.stringify(response.data));
+                    const tokenTemp = response.data.access_token;
+                    console.log("Token Inside: " + tokenTemp);
+    
+                    if (tokenTemp != null) {
+                        const user = {
+                            userName: userName, password: password
+                        };
+                        UserService.findUserByName(user, tokenTemp)
+                            .then(res => {
+                                let roles = res.data.users.roles;
+    
+                                if (roles.includes("ADMIN_PRIVILEGE")) {
+                                    navigate('/search-employee-skill', {
+                                        state: {
+                                            jsToken: tokenTemp,
+                                            roles: roles,
+                                            userName: userName
+                                        }
+                                    });
+                                } else {
+                                    setUserNamed("");
+                                    setPassword("");
+                                    setErrorMessage(userName+' has role of '+roles+". Not Authorized to see Profile Details");
+                                }
+                                return
+                            });
+                    } else {
+                        // handle error
+                    }
+                })
+                .catch(function (error) {
+                    setUserNamed("");
+                    setPassword("");
+                    setErrorMessage("User Name or Password is Wrong");
+                    console.log(error);
+                });
+        }
     }
 
     const ChangeUserNameHandler = (event) => {
@@ -86,6 +97,8 @@ const LoginComponent = () => {
                     <div className="card col-md-8">
                         {<h3 className="text-center">Login</h3>}
 
+                        {errorMessage && <div className="error"> {errorMessage} </div>}
+                        
                         <div className="card-body">
                             <form>
                                 <Row>
